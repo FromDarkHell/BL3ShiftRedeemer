@@ -7,7 +7,7 @@ It can be configurated to run every hour while hidden and attempt to redeem more
 
 # Installation
 
-1. Download the exe available at [Releases]()
+1. Download the exe available at [Releases](https://github.com/FromDarkHell/BL3ShiftRedeemer/releases/)
 2. Run the exe, it'll prompt you for your SHiFT Email. Go ahead and fill it in
 3. Next up, enter your password since it's kinda needed to login in
 4. It'll prompt you if you want to run it every hour. (This feature only works on Windows so far)
