@@ -123,3 +123,10 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
+
+## ADDED IGNORES
+
+# Cookie/Output Shenanigans 
+*.cookie
+output/savedKeys.json
