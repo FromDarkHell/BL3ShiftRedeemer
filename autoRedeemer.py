@@ -11,6 +11,7 @@ Attributes:
 import os
 import re
 import sys
+import time
 import json
 import pickle
 import getpass
@@ -24,13 +25,15 @@ from bs4 import BeautifulSoup
 
 # User settings / sessions
 requestClient = requests.session()
-debug = True
+
+debug = False
+
 bSupportAllPlatforms = False
 bContinueRedeeming = True
 
 redeemedCodes = {"keys": [{"": ""}]}
 
-# Some constants just for ease / memory
+# Some constants just for ease / my memory
 shiftURL = "https://shift.gearboxsoftware.com"
 platforms = ["epic","steam","xbox","ps"]
 
@@ -217,9 +220,9 @@ if os.name == 'nt': # Windows
 		bProperInfo = False
 		while not bProperInfo:
 			inputPrompt = input("Do you want to schedule this program to run every hour (Program will be hidden) (Y/N)? ")
-			if inputPrompt == "Y":
+			if inputPrompt == "Y" or inputPrompt == "y":
 				bProperInfo = True
-			elif inputPrompt == "N":
+			elif inputPrompt == "N" or inputPrompt == "n":
 				break
 
 		if bProperInfo:
@@ -230,7 +233,7 @@ if os.name == 'nt': # Windows
 			# SchTasks /Delete /TN "SHiFT Automation"
 			output, error = subprocess.Popen('SchTasks /Query /XML /TN "SHiFT Automation"', stdout=subprocess.PIPE, stderr=subprocess.PIPE).communicate()
 			data = output.decode("utf-8").replace("<Hidden>false</Hidden>","<Hidden>true</Hidden>")
-			fileIn = open("SHiFT Automation.xml","wt")
+			fileIn = open("SHiFT Automation.xml","w+")
 			fileIn.write(data)
 			fileIn.close()
 			subprocess.Popen('SchTasks /Delete /TN "SHiFT Automation" /f', stdout=subprocess.PIPE, stderr=subprocess.PIPE)
