@@ -212,7 +212,7 @@ else:
 
 if os.name == 'nt': # Windows
 	output, error = subprocess.Popen('SchTasks /Query /TN "SHiFT Automation"', stdout=subprocess.PIPE, stderr=subprocess.PIPE).communicate()
-	decodedError = error.decode("utf-8")
+	decodedError = error.decode("cp1251")
 	# If it errors out we know that we don't have a scheduled task anymore.
 	if "ERROR" in decodedError and "Access is denied" in decodedError:
 		print("Access is denied. Please run as administrator...")
@@ -232,7 +232,7 @@ if os.name == 'nt': # Windows
 			subprocess.Popen(properCommand, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 			# SchTasks /Delete /TN "SHiFT Automation"
 			output, error = subprocess.Popen('SchTasks /Query /XML /TN "SHiFT Automation"', stdout=subprocess.PIPE, stderr=subprocess.PIPE).communicate()
-			data = output.decode("utf-8").replace("<Hidden>false</Hidden>","<Hidden>true</Hidden>")
+			data = output.decode("cp1251").replace("<Hidden>false</Hidden>","<Hidden>true</Hidden>")
 			fileIn = open("SHiFT Automation.xml","w+")
 			fileIn.write(data)
 			fileIn.close()
