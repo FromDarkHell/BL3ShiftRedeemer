@@ -130,3 +130,5 @@ dmypy.json
 # Cookie/Output Shenanigans 
 *.cookie
 output/savedKeys.json
+release/savedKeys.json
+savedKeys.json
