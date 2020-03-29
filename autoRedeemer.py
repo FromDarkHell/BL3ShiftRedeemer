@@ -18,7 +18,9 @@ import getpass
 import requests
 import subprocess
 from time import sleep
+import browser_cookie3 as bc
 from bs4 import BeautifulSoup
+
 
 # Windows: https://www.windowscentral.com/how-create-task-using-task-scheduler-command-prompt
 # Linux: https://janakiev.com/blog/python-background/
@@ -31,7 +33,7 @@ debug = False
 bSupportAllPlatforms = False
 bContinueRedeeming = True
 
-redeemedCodes = {"keys": [{"": ""}]}
+redeemedCodes = { "keys": [{"": ""}], "scheduled":False }
 
 # Some constants just for ease / my memory
 shiftURL = "https://shift.gearboxsoftware.com"
@@ -51,11 +53,14 @@ def login(username, password):
 	csrfToken = getCSRFToken("{}/home".format(shiftURL))
 	loginData = {"authenticity_token": csrfToken, "user[email]": username, "user[password]": password}
 	response = requestClient.post("{}/sessions".format(shiftURL), data=loginData, headers={"Referer": "{}/home".format(shiftURL)})
-	if(debug): print("	Login: {0} | {1} | {2}".format(response.request.method, response.url, response.status_code))
+	if(debug): 
+		print("	Login: {0} | {1} | {2}".format(response.request.method, response.url, response.status_code))
+	
 	if("si" in requestClient.cookies):
 		with open("loginInfo.cookie", "wb") as f:
 			pickle.dump(requestClient.cookies, f)
 		return True
+
 	if("?redirect_to=false" in response.url):
 		print("Try again... Incorrect login info!")
 		return False
@@ -66,7 +71,8 @@ def getRedemptionForm(key, platform):
 	response = requestClient.get("{shiftURL}/entitlement_offer_codes?code={code}".format(shiftURL=shiftURL, code=key), headers=
 			{'x-csrf-token': token,
 	            'x-requested-with': 'XMLHttpRequest'})
-	if(debug): print("getRedemptionForm: {0} | {1} | {2}".format(response.request.method, response.url, response.status_code))
+	if(debug): 
+		print("getRedemptionForm: {0} | {1} | {2}".format(response.request.method, response.url, response.status_code))
 
 	soup = BeautifulSoup(response.text, "html.parser")
 	if not soup.find("form", class_="new_archway_code_redemption"):
@@ -154,7 +160,8 @@ def redeemKey(key, platform):
 				return "alreadyRedeemed"
 
 	found, statusCode, formData = getRedemptionForm(key, platform)
-	if(debug): print("	redeemKey #1: {0} | {1} | {2}".format(found, statusCode, formData))
+	if(debug): 
+		print("	redeemKey #1: {0} | {1} | {2}".format(found, statusCode, formData))
 	if not found:
 		if "expired" in formData:
 			redeemedCodes["keys"].append({key : platform})
@@ -166,6 +173,7 @@ def redeemKey(key, platform):
 			with open("savedKeys.json", "w") as f:
 				json.dump(redeemedCodes, f)
 			return "Invalid Code"
+		print("Unknown ERROR: ")
 		print(formData)
 		return "UNKNOWN ERROR"
 	status, result = redeemForm(formData)
@@ -191,12 +199,27 @@ if(os.path.exists("loginInfo.cookie")):
 	with open("loginInfo.cookie", "rb") as f:
 		requestClient.cookies.update(pickle.load(f))
 else:
-	bProperLoginInfo = False
-	while not bProperLoginInfo:
-		print("Login to your SHiFT account...")
-		user = input("SHiFT Email: ")
-		password = getpass.getpass(prompt="Password: ")
-		bProperLoginInfo = login(user, password)
+	hasLoadedCookies = False
+
+	if 'browser_cookie3' in sys.modules: # Probably best to check if the module is loaded eh?
+		shiftCookies = None
+		try: 
+			print("(Attempting) to load chrome cookies...")
+			shiftCookies = bc.chrome()
+		except:
+			print("(Attempting) to load firefox cookies...")
+			shiftCookies = bc.firefox()
+		if(shiftCookies != None):
+			requestClient.cookies.update(shiftCookies)
+		hasLoadedCookies = (shiftCookies != None)
+
+	if not hasLoadedCookies: # If we weren't able to load our cookies, we should just prompt them for their input.
+		bProperLoginInfo = False
+		while not bProperLoginInfo:
+			print("Login to your SHiFT account...")
+			user = input("SHiFT Email: ")
+			password = getpass.getpass(prompt="Password: ")
+			bProperLoginInfo = login(user, password)
 
 # Read out the keys from savedKeys.json
 print("Reading cached keys...")
@@ -216,13 +239,17 @@ if os.name == 'nt': # Windows
 	# If it errors out we know that we don't have a scheduled task anymore.
 	if "ERROR" in decodedError and "Access is denied" in decodedError:
 		print("Access is denied. Please run as administrator...")
-	elif "ERROR" in decodedError:
+	elif "ERROR" in decodedError and not redeemedCodes["scheduled"]:
 		bProperInfo = False
+
 		while not bProperInfo:
 			inputPrompt = input("Do you want to schedule this program to run every hour (Program will be hidden) (Y/N)? ")
 			if inputPrompt == "Y" or inputPrompt == "y":
 				bProperInfo = True
+				redeemedCodes["scheduled"] = True
 			elif inputPrompt == "N" or inputPrompt == "n":
+				# If we said no, we should probably delete it if it exists in the first place.
+				subprocess.Popen('SchTasks /Delete /TN "SHiFT Automation" /f', stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 				break
 
 		if bProperInfo:
@@ -244,7 +271,8 @@ print("Using data provided by Orcicorn's SHiFT and VIP Code archive...")
 
 keyJSON = json.loads(requestClient.get("https://shift.orcicorn.com/tags/borderlands3/index.json").text)[0]["codes"]
 
-if os.path.exists("SHiFT Automation.xml"): os.remove("SHiFT Automation.xml")
+if os.path.exists("SHiFT Automation.xml"): 
+	os.remove("SHiFT Automation.xml")
 
 for shiftKey in keyJSON:
 	if bContinueRedeeming:
