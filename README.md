@@ -11,13 +11,13 @@ It can be configurated to run every hour while hidden and attempt to redeem more
 2. Run the exe, 
 3. It'll probably take a bit to get started but: it'll first attempt to read your browser cookies for login info
 	* If it can't read cookies, it'll prompt you for your SHiFT Email. Go ahead and fill it in
-4. Next up, enter your password since it's kinda needed to login in
-5. It'll prompt you if you want to run it every hour. (This feature only works on Windows so far)
+	* Next up, enter your password since it's kinda needed to login in
+4. It'll prompt you if you want to run it every hour. (This feature only works on Windows so far)
     * It should hopefully say something along the lines of `SUCCESS: The scheduled task "SHiFT Automation" was created`. If it doesn't, please contact me for help!
         * If you plan to remove the self-scheduling in the future you can run `SchTasks /Delete /TN "SHiFT Automation" /f` in your terminal or you can run `Task Scheduler` and delete it from there.
-6. Next it'll run through all of the codes, generating a list of all the ones that you've used, and if you've not used it, it'll activate it and then mark it as used!
-7. That's it!
-8. If you chose to automate execution, you'll need not touch SHiFT keys (probably) unless you want to!
+5. Next it'll run through all of the codes, generating a list of all the ones that you've used, and if you've not used it, it'll activate it and then mark it as used!
+6. That's it!
+7. If you chose to automate execution, you'll need not touch SHiFT keys (probably) unless you want to!
 
 # Credits
 
