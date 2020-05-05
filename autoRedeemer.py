@@ -47,6 +47,7 @@ platforms = ["epic","steam","xbox","ps"] # A set of the possible? platforms for 
 def getRedemptionForm(key, platform):
 	redemptionURL = "{}/code_redemptions/new".format(shiftURL)
 	token = getCSRFToken(redemptionURL)
+	if(debug): print("CSRF Token: {0}".format(token))
 	response = requestClient.get("{shiftURL}/entitlement_offer_codes?code={code}".format(shiftURL=shiftURL, code=key), headers=
 			{'x-csrf-token': token,
 	            'x-requested-with': 'XMLHttpRequest'})
@@ -153,7 +154,7 @@ def redeemKey(key, platform):
 			with open("savedKeys.json", "w") as f:
 				json.dump(redeemedCodes, f)
 			return "Invalid Code"
-		print("Unknown ERROR: ")
+		print("Unknown error getting form data: ")
 		print(formData)
 		return "UNKNOWN ERROR"
 
@@ -192,6 +193,7 @@ def redeemAllKeys(keyJSON):
 		else:
 			print("Rate limited! Please wait an hour or launch a SHiFT enabled title!")
 			break
+
 # Here's the bit of code used for logging in, so that way we can keep all of our stuff organized (somewhat)
 def getCSRFToken(urlData):
 	response = None
@@ -201,6 +203,7 @@ def getCSRFToken(urlData):
 		response = urlData.text
 	csrfToken = re.search('csrf-token" content="(.*)"', response).group(0).split('content="')[1].replace('"','',1)
 	return csrfToken
+
 def login(username, password):
 	csrfToken = getCSRFToken("{}/home".format(shiftURL))
 	loginData = {"authenticity_token": csrfToken, "user[email]": username, "user[password]": password}
@@ -230,9 +233,11 @@ def infolessLogin():
 			try: 
 				print("(Attempting) to load chrome cookies...")
 				shiftCookies = bc.chrome()
+				print("Loaded chrome cookies...")
 			except:
 				print("(Attempting) to load firefox cookies...")
 				shiftCookies = bc.firefox()
+				print("Loaded firefox cookies...");
 			if(shiftCookies != None):
 				requestClient.cookies.update(shiftCookies)
 			hasLoadedCookies = (shiftCookies != None)
@@ -268,11 +273,12 @@ def scheduleTask():
 
 			if bProperInfo:
 				properPath = os.path.realpath(__file__).replace(".py",".exe")
-				# SchTasks /Create /SC HOURLY /TN "SHiFT Automation" /TR /NP "\"K:\Borderlands 3 - Tools\Auto SHiFT Redeemer (Background Process)\output\autoRedeemer.exe"
-				properCommand = 'SchTasks /Create /SC HOURLY /TN "SHiFT Automation" /NP /TR "\\"{0}"\\"'.format(properPath)
+				# SchTasks /Create /SC HOURLY /TN "SHiFT Automation" /TR /NP "K:\Borderlands 3 - Tools\Auto SHiFT Redeemer (Background Process)\release\autoRedeemer.exe"
+				properCommand = 'SchTasks /Create /SC HOURLY /TN "SHiFT Automation" /NP /TR "{0}"'.format(properPath)
 				subprocess.Popen(properCommand, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 				# SchTasks /Delete /TN "SHiFT Automation"
 				output, error = subprocess.Popen('SchTasks /Query /XML /TN "SHiFT Automation"', stdout=subprocess.PIPE, stderr=subprocess.PIPE).communicate()
+				print(error)
 				data = output.decode("cp1251").replace("<Hidden>false</Hidden>","<Hidden>true</Hidden>")
 				fileIn = open("SHiFT Automation.xml","w+")
 				fileIn.write(data)
@@ -298,7 +304,7 @@ keyJSON = json.loads(requestClient.get("https://shift.orcicorn.com/tags/borderla
 
 # Sometimes the file sticks around after a bit, so we should remove it right 'round here.
 if os.path.exists("SHiFT Automation.xml"): os.remove("SHiFT Automation.xml")
-
+print("Starting to redeem keys...")
 # Start to redeem all of our keys
 redeemAllKeys(keyJSON)
 
