@@ -24,7 +24,7 @@ pyaes==1.6.1
 pycparser==2.20
 pycryptodome==3.9.7
 PyInstaller==3.6
-pywin32==227
+pywin32==301
 pywin32-ctypes==0.2.0
 requests==2.23.0
 soupsieve==2.0
