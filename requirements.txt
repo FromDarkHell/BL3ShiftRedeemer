@@ -1,7 +1,7 @@
 ﻿altgraph==0.17
 auto-py-to-exe==2.6.6
 beautifulsoup4==4.8.2
-bottle==0.12.18
+bottle==0.12.20
 bottle-websocket==0.2.9
 browser-cookie3==0.11.0
 bs4==0.0.1
